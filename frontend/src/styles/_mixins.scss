@@ -1,0 +1,175 @@
+@use "variables" as *;
+
+// ─── Responsive Breakpoint Mixins (Mobile-First) ─────────────────
+@mixin respond-sm {
+    @media (min-width: #{$bp-sm}) {
+        @content;
+    }
+}
+
+@mixin respond-md {
+    @media (min-width: #{$bp-md}) {
+        @content;
+    }
+}
+
+@mixin respond-lg {
+    @media (min-width: #{$bp-lg}) {
+        @content;
+    }
+}
+
+// ─── Flexbox Helpers ─────────────────────────────────────────────
+@mixin flex($dir: row, $align: center, $justify: flex-start, $gap: 0) {
+    display: flex;
+    flex-direction: $dir;
+    align-items: $align;
+    justify-content: $justify;
+
+    @if $gap !=0 {
+        gap: $gap;
+    }
+}
+
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// ─── Typography Helpers ──────────────────────────────────────────
+@mixin text-truncate {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+@mixin text-clamp($lines: 2) {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+// ─── Visual Helpers ──────────────────────────────────────────────
+@mixin glass {
+    background: rgba($color-panel, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+@mixin glow-border($color: $color-accent) {
+    border: 1px solid rgba($color, 0.5);
+    box-shadow: 0 0 12px rgba($color, 0.2), inset 0 0 12px rgba($color, 0.05);
+}
+
+@mixin focus-ring($color: $color-accent) {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba($color, 0.4);
+}
+
+// ─── Touch-Friendly Hit Target ────────────────────────────────────
+@mixin touch-target($size: 44px) {
+    min-height: $size;
+    min-width: $size;
+    @include flex-center;
+}
+
+// ─── Scrollbar Styling ───────────────────────────────────────────
+@mixin custom-scrollbar($width: 4px, $color: $color-border-light) {
+    &::-webkit-scrollbar {
+        width: $width;
+        height: $width;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: $color;
+        border-radius: $radius-full;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: $color-text-muted;
+    }
+}
+
+// ─── Button Base ─────────────────────────────────────────────────
+@mixin btn-base {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: $space-2;
+    font-family: $font-body;
+    font-weight: 600;
+    font-size: $font-size-base;
+    border: none;
+    border-radius: $radius-md;
+    cursor: pointer;
+    transition: all $transition-base;
+    min-height: 44px;
+    padding: $space-3 $space-6;
+    text-decoration: none;
+    white-space: nowrap;
+    user-select: none;
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+}
+
+// ─── Input Base ──────────────────────────────────────────────────
+@mixin input-base {
+    width: 100%;
+    font-family: $font-body;
+    font-size: $font-size-base;
+    color: $color-text;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    padding: $space-3 $space-4;
+    min-height: 48px;
+    transition: border-color $transition-fast, box-shadow $transition-fast;
+    outline: none;
+    -webkit-appearance: none;
+
+    &::placeholder {
+        color: $color-text-faint;
+    }
+
+    &:focus {
+        border-color: $color-accent;
+        @include focus-ring;
+    }
+}
+
+// ─── Card ────────────────────────────────────────────────────────
+@mixin card {
+    background: $color-panel;
+    border: 1px solid $color-border;
+    border-radius: $radius-lg;
+}
+
+// ─── Animated Underline ──────────────────────────────────────────
+@mixin animated-underline($color: $color-accent) {
+    position: relative;
+
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background: $color;
+        transition: width $transition-base;
+    }
+
+    &:hover::after {
+        width: 100%;
+    }
+}

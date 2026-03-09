@@ -1,0 +1,830 @@
+@use '../styles/variables' as *;
+@use '../styles/mixins' as *;
+
+// ─── Dashboard Shell ─────────────────────────────────────────────
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
+    background: $color-bg;
+}
+
+// ─── Navbar ──────────────────────────────────────────────────────
+.navbar {
+    height: $navbar-height;
+    flex-shrink: 0;
+    @include flex(row, center, space-between);
+    padding: 0 $space-4;
+    background: $color-surface;
+    border-bottom: 1px solid $color-border;
+    position: relative;
+    z-index: 100;
+
+    @include respond-sm {
+        padding: 0 $space-6;
+    }
+
+    @include respond-md {
+        height: $navbar-height-md;
+        padding: 0 $space-8;
+    }
+
+    &__logo {
+        @include flex(row, center, flex-start, $space-2);
+        text-decoration: none;
+
+        &-icon {
+            width: 30px;
+            height: 30px;
+            @include flex-center;
+            background: $color-accent-dim;
+            border: 1px solid rgba($color-accent, 0.3);
+            border-radius: $radius-sm;
+            color: $color-accent;
+            flex-shrink: 0;
+        }
+
+        &-text {
+            font-family: $font-display;
+            font-weight: 700;
+            font-size: $font-size-md;
+            color: $color-text;
+
+            span {
+                color: $color-accent;
+            }
+        }
+    }
+
+    &__center {
+        display: none;
+
+        @include respond-md {
+            display: flex;
+            align-items: center;
+            gap: $space-2;
+            font-family: $font-mono;
+            font-size: $font-size-xs;
+            color: $color-text-faint;
+        }
+    }
+
+    &__dot {
+        width: 6px;
+        height: 6px;
+        border-radius: $radius-full;
+        background: $color-success;
+        box-shadow: 0 0 6px $color-success;
+    }
+
+    &__right {
+        @include flex(row, center, flex-end, $space-2);
+
+        @include respond-sm {
+            gap: $space-3;
+        }
+    }
+
+    &__user {
+        display: none;
+        align-items: center;
+        gap: $space-2;
+
+        @include respond-sm {
+            display: flex;
+        }
+    }
+
+    &__avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: $radius-full;
+        background: rgba($color-accent, 0.15);
+        border: 1px solid rgba($color-accent, 0.3);
+        @include flex-center;
+        font-family: $font-mono;
+        font-size: $font-size-xs;
+        font-weight: 600;
+        color: $color-accent;
+        text-transform: uppercase;
+    }
+
+    &__username {
+        font-size: $font-size-sm;
+        color: $color-text-muted;
+        max-width: 120px;
+        @include text-truncate;
+    }
+
+    &__logout {
+        @include btn-base;
+        min-height: 34px;
+        padding: $space-2 $space-3;
+        background: transparent;
+        border: 1px solid $color-border;
+        color: $color-text-muted;
+        font-size: $font-size-sm;
+        border-radius: $radius-sm;
+
+        &:hover {
+            background: $color-panel;
+            color: $color-text;
+            border-color: $color-border-light;
+        }
+    }
+}
+
+// ─── Main Layout ─────────────────────────────────────────────────
+.workspace {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
+    @include respond-md {
+        flex-direction: row;
+    }
+}
+
+// ─── Question List / Sidebar ─────────────────────────────────────
+.question-list {
+    display: flex;
+    flex-direction: column;
+    background: $color-surface;
+    border-bottom: 1px solid $color-border;
+    flex-shrink: 0;
+
+    // Mobile: horizontal scroll strip at top
+    max-height: 56px;
+    overflow: hidden;
+
+    @include respond-sm {
+        max-height: 220px;
+    }
+
+    @include respond-md {
+        width: $sidebar-width;
+        max-height: none;
+        height: 100%;
+        border-bottom: none;
+        border-right: 1px solid $color-border;
+    }
+
+    @include respond-lg {
+        width: $sidebar-width-lg;
+    }
+
+    &__header {
+        @include flex(row, center, space-between);
+        padding: $space-3 $space-4;
+        border-bottom: 1px solid $color-border;
+        flex-shrink: 0;
+
+        @include respond-md {
+            padding: $space-4 $space-5;
+        }
+    }
+
+    &__title {
+        font-family: $font-mono;
+        font-size: $font-size-xs;
+        font-weight: 600;
+        color: $color-text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    &__count {
+        font-family: $font-mono;
+        font-size: $font-size-xs;
+        color: $color-text-faint;
+        background: $color-panel;
+        border: 1px solid $color-border;
+        border-radius: $radius-full;
+        padding: 1px $space-2;
+    }
+
+    &__search {
+        padding: $space-3;
+        border-bottom: 1px solid $color-border;
+        flex-shrink: 0;
+        display: none;
+
+        @include respond-md {
+            display: block;
+        }
+
+        input {
+            @include input-base;
+            min-height: 36px;
+            padding: $space-2 $space-3 $space-2 36px;
+            font-size: $font-size-sm;
+            background: $color-panel;
+        }
+
+        &-wrap {
+            position: relative;
+
+            svg {
+                position: absolute;
+                left: $space-3;
+                top: 50%;
+                transform: translateY(-50%);
+                color: $color-text-faint;
+                pointer-events: none;
+                width: 14px;
+                height: 14px;
+            }
+        }
+    }
+
+    &__filter {
+        @include flex(row, center, flex-start, $space-2);
+        padding: $space-2 $space-3;
+        border-bottom: 1px solid $color-border;
+        flex-shrink: 0;
+        overflow-x: auto;
+        @include custom-scrollbar(2px);
+
+        display: none;
+
+        @include respond-md {
+            display: flex;
+        }
+    }
+
+    &__filter-btn {
+        @include btn-base;
+        min-height: 28px;
+        padding: $space-1 $space-3;
+        font-size: $font-size-xs;
+        font-weight: 500;
+        border-radius: $radius-full;
+        background: transparent;
+        border: 1px solid $color-border;
+        color: $color-text-muted;
+        white-space: nowrap;
+
+        &:hover {
+            background: $color-panel;
+            color: $color-text;
+        }
+
+        &--active {
+            background: $color-accent-dim;
+            border-color: rgba($color-accent, 0.4);
+            color: $color-accent;
+
+            &:hover {
+                background: $color-accent-dim;
+            }
+        }
+    }
+
+    &__scroll {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        @include custom-scrollbar;
+
+        // Mobile: horizontal scroll
+        overflow-x: auto;
+        overflow-y: hidden;
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        padding: $space-2;
+        gap: $space-2;
+
+        @include respond-sm {
+            padding: $space-3;
+            gap: $space-2;
+        }
+
+        @include respond-md {
+            flex-direction: column;
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding: $space-2;
+            gap: $space-1;
+            align-items: stretch;
+        }
+    }
+
+    &__empty {
+        @include flex(column, center, center);
+        padding: $space-8;
+        color: $color-text-faint;
+        font-size: $font-size-sm;
+        gap: $space-2;
+        text-align: center;
+        min-width: 200px;
+
+        @include respond-md {
+            min-width: unset;
+        }
+    }
+}
+
+// ─── Question Card (BEM) ─────────────────────────────────────────
+.question-card {
+    background: $color-panel;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    padding: $space-3;
+    cursor: pointer;
+    transition: all $transition-base;
+    flex-shrink: 0;
+    width: 220px;
+
+    @include respond-sm {
+        width: 240px;
+    }
+
+    @include respond-md {
+        width: 100%;
+        border-radius: $radius-md;
+        padding: $space-3 $space-4;
+    }
+
+    &:hover {
+        background: $color-panel-hover;
+        border-color: $color-border-light;
+        transform: translateX(2px);
+
+        @media (max-width: #{$bp-md - 1px}) {
+            transform: translateY(-2px);
+        }
+    }
+
+    &--active {
+        background: $color-accent-dim;
+        border-color: rgba($color-accent, 0.4);
+
+        &:hover {
+            background: $color-accent-dim;
+        }
+
+        .question-card__title {
+            color: $color-accent;
+        }
+    }
+
+    &__header {
+        @include flex(row, flex-start, space-between, $space-2);
+        margin-bottom: $space-2;
+    }
+
+    &__number {
+        font-family: $font-mono;
+        font-size: $font-size-xs;
+        color: $color-text-faint;
+        flex-shrink: 0;
+    }
+
+    &__badge {
+        font-family: $font-mono;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 1px $space-2;
+        border-radius: $radius-full;
+        flex-shrink: 0;
+
+        &--easy {
+            background: rgba($color-tag-easy, 0.15);
+            color: $color-tag-easy;
+            border: 1px solid rgba($color-tag-easy, 0.3);
+        }
+
+        &--medium {
+            background: rgba($color-tag-medium, 0.15);
+            color: $color-tag-medium;
+            border: 1px solid rgba($color-tag-medium, 0.3);
+        }
+
+        &--hard {
+            background: rgba($color-tag-hard, 0.15);
+            color: $color-tag-hard;
+            border: 1px solid rgba($color-tag-hard, 0.3);
+        }
+    }
+
+    &__title {
+        font-size: $font-size-sm;
+        font-weight: 600;
+        color: $color-text;
+        line-height: 1.4;
+        transition: color $transition-fast;
+
+        @include respond-md {
+            @include text-clamp(2);
+        }
+    }
+
+    &__meta {
+        @include flex(row, center, flex-start, $space-2);
+        margin-top: $space-2;
+        flex-wrap: wrap;
+        gap: $space-1;
+    }
+
+    &__category {
+        font-family: $font-mono;
+        font-size: 10px;
+        color: $color-text-faint;
+        background: rgba($color-border, 0.5);
+        border-radius: $radius-sm;
+        padding: 1px $space-2;
+        white-space: nowrap;
+    }
+}
+
+// ─── Editor Panel ─────────────────────────────────────────────────
+.editor-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: $color-bg;
+
+    &__empty {
+        flex: 1;
+        @include flex(column, center, center);
+        gap: $space-4;
+        padding: $space-8;
+        text-align: center;
+
+        &-icon {
+            width: 64px;
+            height: 64px;
+            @include flex-center;
+            background: $color-panel;
+            border: 1px solid $color-border;
+            border-radius: $radius-xl;
+            color: $color-text-faint;
+            font-size: 28px;
+        }
+
+        &-title {
+            font-family: $font-display;
+            font-size: $font-size-xl;
+            font-weight: 700;
+            color: $color-text;
+        }
+
+        &-sub {
+            font-size: $font-size-sm;
+            color: $color-text-muted;
+            max-width: 300px;
+        }
+
+        &-hint {
+            @include flex(row, center, center, $space-2);
+            font-family: $font-mono;
+            font-size: $font-size-xs;
+            color: $color-text-faint;
+            padding: $space-2 $space-4;
+            background: $color-panel;
+            border: 1px solid $color-border;
+            border-radius: $radius-full;
+        }
+    }
+}
+
+// ─── Question Detail Header ──────────────────────────────────────
+.question-detail {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+
+    &__topbar {
+        @include flex(row, center, space-between);
+        padding: $space-3 $space-4;
+        background: $color-surface;
+        border-bottom: 1px solid $color-border;
+        flex-shrink: 0;
+        gap: $space-3;
+        flex-wrap: wrap;
+
+        @include respond-sm {
+            padding: $space-3 $space-5;
+            flex-wrap: nowrap;
+        }
+    }
+
+    &__meta {
+        @include flex(row, center, flex-start, $space-3);
+        flex-wrap: wrap;
+        gap: $space-2;
+    }
+
+    &__title {
+        font-family: $font-display;
+        font-size: $font-size-lg;
+        font-weight: 700;
+        color: $color-text;
+        line-height: 1.3;
+    }
+
+    &__actions {
+        @include flex(row, center, flex-end, $space-2);
+        flex-shrink: 0;
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        overflow: hidden;
+
+        @include respond-md {
+            flex-direction: row;
+        }
+    }
+
+    // Left: description pane
+    &__description {
+        flex-shrink: 0;
+        overflow-y: auto;
+        padding: $space-4;
+        border-bottom: 1px solid $color-border;
+        @include custom-scrollbar;
+
+        // Mobile: short height
+        max-height: 200px;
+
+        @include respond-sm {
+            max-height: 240px;
+        }
+
+        @include respond-md {
+            width: 340px;
+            max-height: none;
+            border-bottom: none;
+            border-right: 1px solid $color-border;
+            padding: $space-5;
+        }
+
+        @include respond-lg {
+            width: 380px;
+        }
+    }
+
+    &__desc-section {
+        margin-bottom: $space-5;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    &__desc-label {
+        font-family: $font-mono;
+        font-size: $font-size-xs;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: $color-text-faint;
+        margin-bottom: $space-2;
+    }
+
+    &__desc-text {
+        font-size: $font-size-base;
+        color: $color-text-muted;
+        line-height: 1.7;
+    }
+
+    &__schema-block {
+        background: $color-surface;
+        border: 1px solid $color-border;
+        border-radius: $radius-md;
+        padding: $space-3;
+        font-family: $font-mono;
+        font-size: $font-size-xs;
+        color: $color-text-muted;
+        line-height: 1.6;
+        overflow-x: auto;
+        white-space: pre;
+        @include custom-scrollbar(2px);
+    }
+
+    &__tags {
+        @include flex(row, center, flex-start);
+        flex-wrap: wrap;
+        gap: $space-1;
+    }
+
+    &__tag {
+        font-family: $font-mono;
+        font-size: 10px;
+        color: rgba($color-accent, 0.7);
+        background: rgba($color-accent, 0.08);
+        border: 1px solid rgba($color-accent, 0.2);
+        border-radius: $radius-sm;
+        padding: 1px $space-2;
+    }
+
+    &__expected {
+        background: rgba($color-success, 0.05);
+        border: 1px solid rgba($color-success, 0.2);
+        border-radius: $radius-md;
+        padding: $space-3;
+        font-family: $font-mono;
+        font-size: $font-size-xs;
+        color: rgba($color-success, 0.8);
+        line-height: 1.6;
+        overflow-x: auto;
+        white-space: pre;
+        @include custom-scrollbar(2px);
+    }
+
+    // Right: editor pane
+    &__editor {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        min-height: 240px;
+
+        @include respond-md {
+            min-height: unset;
+        }
+    }
+
+    &__editor-header {
+        @include flex(row, center, space-between);
+        padding: $space-2 $space-4;
+        background: $color-surface;
+        border-bottom: 1px solid $color-border;
+        flex-shrink: 0;
+    }
+
+    &__editor-file {
+        @include flex(row, center, flex-start, $space-2);
+        font-family: $font-mono;
+        font-size: $font-size-xs;
+        color: $color-text-muted;
+
+        &-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: $radius-full;
+            background: $color-warning;
+        }
+    }
+
+    &__editor-btns {
+        @include flex(row, center, flex-end, $space-2);
+    }
+
+    &__monaco {
+        flex: 1;
+        overflow: hidden;
+    }
+}
+
+// ─── Buttons ─────────────────────────────────────────────────────
+.btn {
+    @include btn-base;
+
+    &--primary {
+        background: $color-accent;
+        color: $color-bg;
+        font-weight: 700;
+
+        &:hover {
+            background: lighten(#00d9ff, 5%);
+            box-shadow: $shadow-glow;
+        }
+
+        &:active {
+            transform: scale(0.97);
+        }
+    }
+
+    &--ghost {
+        background: transparent;
+        border: 1px solid $color-border;
+        color: $color-text-muted;
+
+        &:hover {
+            background: $color-panel;
+            color: $color-text;
+            border-color: $color-border-light;
+        }
+    }
+
+    &--sm {
+        min-height: 32px;
+        padding: $space-1 $space-3;
+        font-size: $font-size-xs;
+        border-radius: $radius-sm;
+    }
+
+    &--icon {
+        min-height: 32px;
+        min-width: 32px;
+        padding: $space-1;
+        border-radius: $radius-sm;
+    }
+}
+
+// ─── Run Result Bar ──────────────────────────────────────────────
+.run-result {
+    padding: $space-3 $space-5;
+    border-top: 1px solid $color-border;
+    background: $color-surface;
+    flex-shrink: 0;
+    @include flex(row, center, flex-start, $space-3);
+    font-family: $font-mono;
+    font-size: $font-size-sm;
+    animation: slideUp 0.25s ease;
+
+    &__icon {
+        flex-shrink: 0;
+    }
+
+    &__msg {
+        color: $color-text;
+    }
+
+    &__time {
+        color: $color-text-faint;
+        margin-left: auto;
+    }
+
+    &--success {
+        border-top-color: rgba($color-success, 0.3);
+        background: rgba($color-success, 0.05);
+
+        .run-result__icon {
+            color: $color-success;
+        }
+    }
+
+    &--error {
+        border-top-color: rgba($color-danger, 0.3);
+        background: rgba($color-danger, 0.05);
+
+        .run-result__icon {
+            color: $color-danger;
+        }
+    }
+}
+
+// ─── Mobile toggle for sidebar ───────────────────────────────────
+.question-list {
+    &--expanded {
+        max-height: 240px;
+
+        @include respond-sm {
+            max-height: 300px;
+        }
+
+        @include respond-md {
+            max-height: none;
+        }
+    }
+}
+
+// ─── Strength meter (in Signup) ─────────────────────────────────
+.auth__strength {
+    @include flex(row, center, flex-start, $space-3);
+    margin-top: $space-1;
+}
+
+.auth__strength-bars {
+    @include flex(row, center, flex-start, $space-1);
+    flex: 1;
+}
+
+.auth__strength-bar {
+    flex: 1;
+    height: 3px;
+    background: $color-border;
+    border-radius: $radius-full;
+    transition: background $transition-base;
+}
+
+.auth__strength-label {
+    font-size: $font-size-xs;
+    font-weight: 600;
+    min-width: 40px;
+    text-align: right;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -1,0 +1,340 @@
+@use '../styles/variables' as *;
+@use '../styles/mixins' as *;
+
+// ─── Auth Layout ─────────────────────────────────────────────────
+.auth {
+    min-height: 100dvh;
+    @include flex(row, stretch, flex-start);
+    position: relative;
+    overflow: hidden;
+
+    // ─── Left panel (visual) — hidden on mobile ─────────────────
+    &__visual {
+        display: none;
+
+        @include respond-md {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-end;
+            padding: $space-12;
+            position: relative;
+            overflow: hidden;
+            background: $color-surface;
+            border-right: 1px solid $color-border;
+        }
+    }
+
+    &__visual-bg {
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(ellipse 80% 60% at 30% 40%, rgba($color-accent, 0.08) 0%, transparent 70%),
+            radial-gradient(ellipse 60% 80% at 80% 80%, rgba($color-success, 0.04) 0%, transparent 60%);
+    }
+
+    &__visual-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba($color-border, 0.5) 1px, transparent 1px),
+            linear-gradient(90deg, rgba($color-border, 0.5) 1px, transparent 1px);
+        background-size: 48px 48px;
+        mask-image: radial-gradient(ellipse 90% 90% at 30% 40%, black 0%, transparent 80%);
+    }
+
+    &__visual-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    &__visual-label {
+        font-family: $font-mono;
+        font-size: $font-size-xs;
+        color: $color-accent;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        margin-bottom: $space-4;
+        @include flex(row, center, flex-start, $space-2);
+
+        &::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 1px;
+            background: $color-accent;
+        }
+    }
+
+    &__visual-headline {
+        font-size: $font-size-3xl;
+        font-weight: 800;
+        color: $color-text;
+        line-height: 1.1;
+        margin-bottom: $space-4;
+
+        @include respond-lg {
+            font-size: $font-size-4xl;
+        }
+    }
+
+    &__visual-sub {
+        font-size: $font-size-base;
+        color: $color-text-muted;
+        max-width: 400px;
+        line-height: 1.7;
+    }
+
+    &__visual-chips {
+        @include flex(row, center, flex-start, $space-2);
+        flex-wrap: wrap;
+        margin-top: $space-8;
+    }
+
+    &__visual-chip {
+        font-family: $font-mono;
+        font-size: $font-size-xs;
+        color: $color-text-muted;
+        background: rgba($color-border, 0.5);
+        border: 1px solid $color-border;
+        border-radius: $radius-sm;
+        padding: $space-1 $space-3;
+    }
+
+    // ─── Right panel (form) ───────────────────────────────────────
+    &__panel {
+        width: 100%;
+        @include flex(column, center, center);
+        padding: $space-8 $space-6;
+        min-height: 100dvh;
+        background: $color-bg;
+
+        @include respond-sm {
+            padding: $space-8;
+        }
+
+        @include respond-md {
+            width: 480px;
+            min-width: 480px;
+            flex-shrink: 0;
+        }
+
+        @include respond-lg {
+            width: 520px;
+            min-width: 520px;
+        }
+    }
+
+    &__inner {
+        width: 100%;
+        max-width: 420px;
+    }
+
+    // ─── Logo ────────────────────────────────────────────────────
+    &__logo {
+        @include flex(row, center, flex-start, $space-3);
+        margin-bottom: $space-10;
+
+        &-icon {
+            width: 36px;
+            height: 36px;
+            @include flex-center;
+            background: $color-accent-dim;
+            border: 1px solid rgba($color-accent, 0.3);
+            border-radius: $radius-md;
+            color: $color-accent;
+            font-size: $font-size-lg;
+        }
+
+        &-text {
+            font-family: $font-display;
+            font-weight: 700;
+            font-size: $font-size-xl;
+            color: $color-text;
+
+            span {
+                color: $color-accent;
+            }
+        }
+    }
+
+    // ─── Headings ────────────────────────────────────────────────
+    &__heading {
+        font-size: $font-size-2xl;
+        font-weight: 700;
+        color: $color-text;
+        margin-bottom: $space-2;
+
+        @include respond-sm {
+            font-size: $font-size-3xl;
+        }
+    }
+
+    &__subheading {
+        font-size: $font-size-base;
+        color: $color-text-muted;
+        margin-bottom: $space-8;
+    }
+
+    // ─── Form ────────────────────────────────────────────────────
+    &__form {
+        display: flex;
+        flex-direction: column;
+        gap: $space-5;
+    }
+
+    &__field {
+        display: flex;
+        flex-direction: column;
+        gap: $space-2;
+
+        label {
+            font-size: $font-size-sm;
+            font-weight: 600;
+            color: $color-text-muted;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    }
+
+    &__input-wrap {
+        position: relative;
+
+        svg {
+            position: absolute;
+            left: $space-4;
+            top: 50%;
+            transform: translateY(-50%);
+            color: $color-text-faint;
+            pointer-events: none;
+            width: 16px;
+            height: 16px;
+            transition: color $transition-fast;
+        }
+
+        input {
+            @include input-base;
+            padding-left: 44px;
+
+            &:focus+svg,
+            &:focus~svg {
+                color: $color-accent;
+            }
+        }
+
+        &:focus-within svg {
+            color: $color-accent;
+        }
+
+        input {
+            @include input-base;
+            padding-left: 44px;
+        }
+    }
+
+    &__error {
+        @include flex(row, center, flex-start, $space-2);
+        padding: $space-3 $space-4;
+        background: rgba($color-danger, 0.1);
+        border: 1px solid rgba($color-danger, 0.3);
+        border-radius: $radius-md;
+        color: $color-danger;
+        font-size: $font-size-sm;
+    }
+
+    // ─── Submit Button ───────────────────────────────────────────
+    &__submit {
+        @include btn-base;
+        width: 100%;
+        background: $color-accent;
+        color: $color-bg;
+        font-size: $font-size-md;
+        font-weight: 700;
+        border-radius: $radius-md;
+        position: relative;
+        overflow: hidden;
+        margin-top: $space-2;
+
+        &::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity $transition-fast;
+        }
+
+        &:hover:not(:disabled) {
+            background: lighten(#00d9ff, 5%);
+            box-shadow: $shadow-glow;
+
+            &::before {
+                opacity: 1;
+            }
+        }
+
+        &:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        &--loading {
+            pointer-events: none;
+
+            .auth__spinner {
+                display: block;
+            }
+        }
+    }
+
+    &__spinner {
+        display: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba($color-bg, 0.3);
+        border-top-color: $color-bg;
+        border-radius: $radius-full;
+        animation: spin 0.7s linear infinite;
+    }
+
+    // ─── Divider ────────────────────────────────────────────────
+    &__divider {
+        @include flex(row, center, center, $space-3);
+        margin: $space-2 0;
+        color: $color-text-faint;
+        font-size: $font-size-sm;
+
+        &::before,
+        &::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: $color-border;
+        }
+    }
+
+    // ─── Footer link ─────────────────────────────────────────────
+    &__footer {
+        text-align: center;
+        margin-top: $space-6;
+        font-size: $font-size-sm;
+        color: $color-text-muted;
+
+        a {
+            color: $color-accent;
+            font-weight: 600;
+            transition: color $transition-fast;
+            @include animated-underline;
+
+            &:hover {
+                color: lighten(#00d9ff, 10%);
+            }
+        }
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
