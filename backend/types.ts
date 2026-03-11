@@ -11,3 +11,8 @@ export const SignupSchema = z.object({
     email:z.email(),
     password:z.string().min(6)
 })
+
+export const AISchema = z.object({
+    userId:z.string(),
+    message:z.string()
+})
