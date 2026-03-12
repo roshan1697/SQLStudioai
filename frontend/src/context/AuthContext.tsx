@@ -1,5 +1,9 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useCallback } from 'react';
+import axios from 'axios';
+
+const BASE_URL = 'http:localhost:3000'
+
 interface User {
     id: string;
     name: string;
@@ -14,6 +18,12 @@ interface AuthContextType {
 }
 const AuthContext = createContext<AuthContextType | null>(null);
 
+const setToken = (token:string) =>{
+    const expireTime = new Date()
+    expireTime.setTime(expireTime.getTime() + (24 * 60 * 60 * 1000))  //24h expiry
+    document.cookie = `authToken=${token}; expires=${expireTime.toUTCString()}; path=/; SameSite=Strict; Secure`
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState(() => {
         try {
@@ -24,13 +34,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     });
 
-    const login = useCallback((email: string, password: string) => {
+    const login = useCallback(async(email: string, password: string) => {
         // Simulate login — replace with real API call
         const users = JSON.parse(localStorage.getItem('sql_editor_users') || '[]');
         const found = users.find(u => u.email === email && u.password === password);
         if (!found) throw new Error('Invalid email or password');
+        const user = await axios.post(`${BASE_URL}/login`,{
+            email:email,
+            password:password
+        })
         const userData = { id: found.id, name: found.name, email: found.email };
-        setUser(userData);
+        setUser(user.data);
+        setToken(user.data.token)
         sessionStorage.setItem('sql_editor_user', JSON.stringify(userData));
         return userData;
     }, []);

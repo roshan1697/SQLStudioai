@@ -3,19 +3,24 @@ import { AISchema, LoginSchema, SignupSchema } from "./types";
 import mongoose from "mongoose";
 import { User } from "./schema";
 import Groq from "groq-sdk";
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import { Auth } from "./middleware/auth";
+
 const app = express()
 const groq = new Groq({apiKey:process.env.GROQ_API_KEY})
+const saltRounds = 10
 app.use(express.json())
 
 //llm call
-app.get('/aihint', async (req, res) => {
-    // const parsedData = AISchema.safeParse(req.body)
-    // if (!parsedData.success) {
-    //     res.status(403).json({ message: 'validation failed' })
-    //     return
-    // }
+app.post('/aihint',Auth , async (req, res) => {
+    const parsedData = AISchema.safeParse(req.body)
+    if (!parsedData.success) {
+        res.status(403).json({ message: 'validation failed' })
+        return
+    }
     res.setHeader('Content-Type', 'text/plain');
-  res.setHeader('Transfer-Encoding', 'chunked');
+    res.setHeader('Transfer-Encoding', 'chunked');
     try {
         //Ai call
         const streamData =()=>{ 
@@ -31,7 +36,7 @@ app.get('/aihint', async (req, res) => {
                 // Set a user message for the assistant to respond to.
                 {
                     role: "user",
-                    content: "Explain the importance of fast language models",
+                    content: parsedData.data.message,
                 },
             ],
             model: 'openai/gpt-oss-120b',
@@ -41,12 +46,14 @@ app.get('/aihint', async (req, res) => {
     }
 
         const stream = await streamData()
+        
         for await ( const chunk of stream){
-            res.write(chunk)
+            res.write(chunk.choices[0]?.delta?.content)
         }
         res.end()
     } catch (error) {
         res.status(403).json({ message: 'AI error' })
+
         return
     }
 })
@@ -59,25 +66,32 @@ app.post('/login', async (req, res) => {
     }
     try {
         const user = await User.findOne({
-            where: {
+            
                 email: parsedData.data.email
-            }
+            
         })
         if (!user) {
             res.status(404).json({
-                message: `user does'nt exists`
+                message: `invalid username or password`
             })
             return
         }
-        if (user.password != parsedData.data.password) {
+        const comparePassword = await bcrypt.compare(parsedData.data.password,user.password as string)
+        if (!comparePassword) {
             res.status(404).json({
                 message: 'invalid username or password'
             })
             return
         }
 
+        const token = jwt.sign(user._id,process.env.JWT_SECRET || '',{
+            expiresIn:'24h'
+        })
+
         res.status(200).json({
-            email: user.email
+            id:user._id,
+            email: user.email,
+            token:token
         })
 
 
@@ -95,17 +109,36 @@ app.post('/signup', async (req, res) => {
         return
     }
     try {
+
+        const hashedPassword = await bcrypt.hash(parsedData.data.password, saltRounds)
+
         const user = await User.create({
             name: parsedData.data.name,
             email: parsedData.data.email,
-            password: parsedData.data.password
-        })
-        res.status(200).json({
-            email: user.email
+            password: hashedPassword
         })
 
-    } catch (error) {
-        res.status(403).json({ message: 'DB error' })
+        const token = jwt.sign(user._id,process.env.JWT_SECRET || '',
+            {
+                expiresIn: '24h'
+            })
+
+        res.status(200).json({
+            userId:user._id,
+            email: user.email,
+            token:token
+        })
+
+    } catch (error:unknown) {
+        const e = error as {code?: 11000}
+        if(e?.code === 11000){
+            res.status(400).json({
+                message:'Email already exists'
+            })
+            return
+        }
+
+        res.status(500).json({ message: 'DB error' })
         return
     }
 })

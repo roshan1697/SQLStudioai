@@ -1,14 +1,14 @@
 import { password } from "bun";
-import z from "zod";
+import z, { email } from "zod";
 
 export const LoginSchema = z.object({
-    email:z.email(),
+    email:z.string().trim().toLowerCase().pipe(z.email()),
     password:z.string().min(6)
 })
 
 export const SignupSchema = z.object({
     name:z.string(),
-    email:z.email(),
+    email:z.string().trim().toLowerCase().pipe(z.email()),
     password:z.string().min(6)
 })
 
