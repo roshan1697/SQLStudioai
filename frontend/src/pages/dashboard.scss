@@ -1,5 +1,6 @@
 @use '../styles/variables' as *;
 @use '../styles/mixins' as *;
+@use 'sass:color';
 
 // ─── Dashboard Shell ─────────────────────────────────────────────
 .dashboard {
@@ -697,7 +698,7 @@
         font-weight: 700;
 
         &:hover {
-            background: lighten(#00d9ff, 5%);
+            background: color.scale(#00d9ff,$lightness: 5%);
             box-shadow: $shadow-glow;
         }
 

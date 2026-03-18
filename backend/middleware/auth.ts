@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import jwt from 'jsonwebtoken'
 
 export const Auth = (req:Request,res:Response,next:NextFunction) =>{
-    const token = req.body('Authorization')
+    const token = req.cookies.authToken
     if(!token){
         res.status(404).json({
             message:'token invalid or missing'

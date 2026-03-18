@@ -6,11 +6,15 @@ import Groq from "groq-sdk";
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { Auth } from "./middleware/auth";
+import cors from 'cors'
 
 const app = express()
 const groq = new Groq({apiKey:process.env.GROQ_API_KEY})
 const saltRounds = 10
 app.use(express.json())
+app.use(cors({
+    origin:'http://localhost:5173'
+}))
 
 //llm call
 app.post('/aihint',Auth , async (req, res) => {

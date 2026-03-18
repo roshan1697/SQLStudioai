@@ -2,18 +2,18 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import axios from 'axios';
 
-const BASE_URL = 'http:localhost:3000'
+const BASE_URL = 'http://localhost:3000'
 
 interface User {
     id: string;
-    name: string;
+    
     email: string;
 }
 
 interface AuthContextType {
-    user: User | null;
-    login: (email: string, password: string) => User;
-    signup: (name: string, email: string, password: string) => User;
+    userdata: User | null;
+    login: (email: string, password: string) => Promise<User | undefined> ;
+    signup: (name: string, email: string, password: string) => Promise<User | undefined>;
     logout: () => void;
 }
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -25,9 +25,9 @@ const setToken = (token:string) =>{
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState(() => {
+    const [userdata, setUserData] = useState<User | null>(() => {
         try {
-            const stored = sessionStorage.getItem('sql_editor_user');
+            const stored = sessionStorage.getItem('user_data');
             return stored ? JSON.parse(stored) : null;
         } catch {
             return null;
@@ -35,40 +35,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     const login = useCallback(async(email: string, password: string) => {
-        // Simulate login — replace with real API call
-        const users = JSON.parse(localStorage.getItem('sql_editor_users') || '[]');
-        const found = users.find(u => u.email === email && u.password === password);
-        if (!found) throw new Error('Invalid email or password');
-        const user = await axios.post(`${BASE_URL}/login`,{
+        try {
+            const user = await axios.post(`${BASE_URL}/login`,{
             email:email,
             password:password
         })
-        const userData = { id: found.id, name: found.name, email: found.email };
-        setUser(user.data);
-        setToken(user.data.token)
-        sessionStorage.setItem('sql_editor_user', JSON.stringify(userData));
-        return userData;
+        if(user){
+            setToken(user.data.token)
+        const  userData = {id:user.data.id,email:user.data.email}
+        setUserData(userData);
+        sessionStorage.setItem('user_data' , JSON.stringify(userData))
+        return userData
+        }
+        
+        } catch (error) {
+            console.log(error)
+        }
+        
+        
     }, []);
 
-    const signup = useCallback((name: string, email: string, password: string) => {
-        const users = JSON.parse(localStorage.getItem('sql_editor_users') || '[]');
-        if (users.find(u => u.email === email)) throw new Error('Email already in use');
-        const newUser = { id: Date.now().toString(), name, email, password };
-        users.push(newUser);
-        localStorage.setItem('sql_editor_users', JSON.stringify(users));
-        const userData = { id: newUser.id, name: newUser.name, email: newUser.email };
-        setUser(userData);
-        sessionStorage.setItem('sql_editor_user', JSON.stringify(userData));
-        return userData;
+    const signup = useCallback(async(name: string, email: string, password: string) => {
+        try {
+            const user = await axios.post(`${BASE_URL}/signup`,{
+                name:name,
+                email:email,
+                password:password
+            })
+            if(user){
+                setToken(user.data.token)
+                const userData = {id:user.data.id,email:user.data.email}
+                setUserData(userData)
+                sessionStorage.setItem('user_data', JSON.stringify(userData))
+                return userData
+            }
+        } catch (error) {
+            console.log(error)
+        }
     }, []);
 
     const logout = useCallback(() => {
-        setUser(null);
-        sessionStorage.removeItem('sql_editor_user');
+        setUserData(null);
+        sessionStorage.removeItem('user_data');
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, login, signup, logout }}>
+        <AuthContext.Provider value={{ userdata, login, signup, logout }}>
             {children}
         </AuthContext.Provider>
     );

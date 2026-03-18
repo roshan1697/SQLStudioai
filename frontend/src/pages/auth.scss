@@ -1,5 +1,6 @@
 @use '../styles/variables' as *;
 @use '../styles/mixins' as *;
+@use 'sass:color';
 
 // ─── Auth Layout ─────────────────────────────────────────────────
 .auth {
@@ -266,7 +267,7 @@
         }
 
         &:hover:not(:disabled) {
-            background: lighten(#00d9ff, 5%);
+            background: color.scale(#00d9ff,$lightness: 5%);
             box-shadow: $shadow-glow;
 
             &::before {
@@ -327,7 +328,7 @@
             @include animated-underline;
 
             &:hover {
-                color: lighten(#00d9ff, 10%);
+                color: color.scale(#00d9ff, $lightness: 10%);
             }
         }
     }
