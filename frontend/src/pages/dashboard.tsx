@@ -135,7 +135,7 @@ function RunResult({ result, onDismiss }) {
 
 // ─── Dashboard Page ───────────────────────────────────────────────
 export default function Dashboard() {
-    const { user, logout } = useAuth();
+    const { userdata, logout } = useAuth();
     const navigate = useNavigate();
 
     const [selectedId, setSelectedId] = useState(null);
@@ -203,7 +203,7 @@ export default function Dashboard() {
     };
 
     const currentCode = selectedId ? (codes[selectedId] ?? selectedQ?.starterCode ?? '') : '';
-    const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2) || '??';
+    const initials = userdata?.email?.split(' ').map(n => n[0]).join('').slice(0, 2) || '??';
 
     return (
         <div className="dashboard">
@@ -222,7 +222,7 @@ export default function Dashboard() {
                 <div className="navbar__right">
                     <div className="navbar__user">
                         <div className="navbar__avatar">{initials}</div>
-                        <span className="navbar__username">{user?.name}</span>
+                        <span className="navbar__username">{userdata?.email}</span>
                     </div>
                     <button className="navbar__logout" onClick={handleLogout} aria-label="Log out">
                         <IconLogout />

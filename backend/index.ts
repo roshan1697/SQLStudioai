@@ -74,6 +74,8 @@ app.post('/login', async (req, res) => {
                 email: parsedData.data.email
             
         })
+        
+        
         if (!user) {
             res.status(404).json({
                 message: `invalid username or password`
@@ -88,18 +90,19 @@ app.post('/login', async (req, res) => {
             return
         }
 
-        const token = jwt.sign(user._id,process.env.JWT_SECRET || '',{
+        const token = jwt.sign({userId:user._id.toString()},process.env.JWT_SECRET || '',{
             expiresIn:'24h'
         })
 
         res.status(200).json({
-            id:user._id,
+            id:user._id.toString(),
             email: user.email,
             token:token
         })
 
 
     } catch (error) {
+        console.log(error)
         res.status(403).json({ message: 'DB error' })
         return
     }
@@ -122,13 +125,13 @@ app.post('/signup', async (req, res) => {
             password: hashedPassword
         })
 
-        const token = jwt.sign(user._id,process.env.JWT_SECRET || '',
+        const token = jwt.sign({userId:user._id.toString()},process.env.JWT_SECRET || '',
             {
                 expiresIn: '24h'
             })
 
         res.status(200).json({
-            userId:user._id,
+            userId:user._id.toString(),
             email: user.email,
             token:token
         })
@@ -141,7 +144,6 @@ app.post('/signup', async (req, res) => {
             })
             return
         }
-
         res.status(500).json({ message: 'DB error' })
         return
     }

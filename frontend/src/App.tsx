@@ -6,13 +6,13 @@ import Dashboard from './pages/dashboard';
 import './styles/main.scss';
 
 function ProtectedRoute({ children }) {
-  const { user } = useAuth();
-  return user ? children : <Navigate to="/login" replace />;
+  const { userdata } = useAuth();
+  return userdata ? children : <Navigate to="/login" replace />;
 }
 
 function PublicRoute({ children }) {
-  const { user } = useAuth();
-  return user ? <Navigate to="/dashboard" replace /> : children;
+  const { userdata } = useAuth();
+  return userdata ? <Navigate to="/dashboard" replace /> : children;
 }
 
 function AppRoutes() {

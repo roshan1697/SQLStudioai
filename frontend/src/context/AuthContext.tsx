@@ -23,6 +23,9 @@ const setToken = (token:string) =>{
     expireTime.setTime(expireTime.getTime() + (24 * 60 * 60 * 1000))  //24h expiry
     document.cookie = `authToken=${token}; expires=${expireTime.toUTCString()}; path=/; SameSite=Strict; Secure`
 }
+const deleteToken = (name:string) =>{
+    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [userdata, setUserData] = useState<User | null>(() => {
@@ -76,6 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const logout = useCallback(() => {
         setUserData(null);
+        deleteToken('authToken')
         sessionStorage.removeItem('user_data');
     }, []);
 
