@@ -1,8 +1,8 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { SQL_QUESTIONS } from '../data/questions';
+// import { SQL_QUESTIONS } from '../data/questions';
 import './dashboard.scss';
 
 // ─── Icons ───────────────────────────────────────────────────────
@@ -57,6 +57,17 @@ const IconChevron = ({ up }) => (
     </svg>
 );
 
+interface SQLProblem {
+  _id: number;
+  title: string;
+  difficulty: "easy" | "medium" | "hard";
+  category: string;
+  description: string;
+  schema: string;
+  starterCode: string;
+  expectedOutput: string;
+  tags: string[];
+}
 // ─── Monaco Editor config ─────────────────────────────────────────
 const EDITOR_OPTIONS = {
     fontSize: 14,
@@ -135,7 +146,7 @@ function RunResult({ result, onDismiss }) {
 
 // ─── Dashboard Page ───────────────────────────────────────────────
 export default function Dashboard() {
-    const { userdata, logout } = useAuth();
+    const { userdata, logout ,question } = useAuth();
     const navigate = useNavigate();
 
     const [selectedId, setSelectedId] = useState(null);
@@ -146,26 +157,36 @@ export default function Dashboard() {
     const [running, setRunning] = useState(false);
     const [listExpanded, setListExpanded] = useState(false);
 
-    const selectedQ = useMemo(() =>
-        SQL_QUESTIONS.find(q => q.id === selectedId) || null,
-        [selectedId]);
+    const [SQL_QUESTIONS , setSQL_QUESTIONS ]= useState<SQLProblem[]>([]) 
 
-    const filteredQuestions = useMemo(() => {
-        return SQL_QUESTIONS.filter(q => {
+    useEffect(()=>{
+        question()
+        .then((data) => {
+            if (data) setSQL_QUESTIONS(data)
+                
+        })
+        .catch(() => console.log("Failed to fetch questions"))
+    },[question])
+    
+    const selectedQ =  SQL_QUESTIONS.find(q => q._id === selectedId) || null
+        
+
+    const filteredQuestions = 
+        SQL_QUESTIONS.filter(q => {
             const matchFilter = filter === 'All' || q.difficulty === filter.toLowerCase();
             const matchSearch = !search ||
                 q.title.toLowerCase().includes(search.toLowerCase()) ||
                 q.category.toLowerCase().includes(search.toLowerCase());
             return matchFilter && matchSearch;
         });
-    }, [filter, search]);
+    
 
     const handleSelect = useCallback((q) => {
-        setSelectedId(q.id);
+        setSelectedId(q._id);
         setRunResult(null);
         setListExpanded(false);
-        if (!codes[q.id]) {
-            setCodes(prev => ({ ...prev, [q.id]: q.starterCode }));
+        if (!codes[q._id]) {
+            setCodes(prev => ({ ...prev, [q._id]: q.starterCode }));
         }
     }, [codes]);
 
@@ -176,7 +197,7 @@ export default function Dashboard() {
 
     const handleReset = useCallback(() => {
         if (!selectedQ) return;
-        setCodes(prev => ({ ...prev, [selectedQ.id]: selectedQ.starterCode }));
+        setCodes(prev => ({ ...prev, [selectedQ._id]: selectedQ.starterCode }));
         setRunResult(null);
     }, [selectedQ]);
 
@@ -289,9 +310,9 @@ export default function Dashboard() {
                         ) : (
                             filteredQuestions.map(q => (
                                 <QuestionCard
-                                    key={q.id}
+                                    key={q._id}
                                     q={q}
-                                    isActive={q.id === selectedId}
+                                    isActive={q._id === selectedId}
                                     onClick={() => handleSelect(q)}
                                 />
                             ))

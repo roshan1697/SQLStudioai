@@ -1,7 +1,7 @@
 import express from "express";
 import { AISchema, LoginSchema, SignupSchema } from "./types";
 import mongoose from "mongoose";
-import { User } from "./schema";
+import { SQLQuestion, User } from "./schema";
 import Groq from "groq-sdk";
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
@@ -15,6 +15,17 @@ app.use(express.json())
 app.use(cors({
     origin:'http://localhost:5173'
 }))
+
+app.get('/question',async(req,res)=>{
+    try {
+        const question = await SQLQuestion.find({})
+        res.status(200).json({
+            question:question
+        })
+    } catch (error) {
+        res.status(403).json({ message: 'DB error' })
+    }
+})
 
 //llm call
 app.post('/aihint',Auth , async (req, res) => {
@@ -102,7 +113,7 @@ app.post('/login', async (req, res) => {
 
 
     } catch (error) {
-        console.log(error)
+        
         res.status(403).json({ message: 'DB error' })
         return
     }
@@ -153,3 +164,6 @@ app.listen('3000', () => {
     mongoose.connect(process.env.MONGODB_URL || '').then(() => console.log('DB connected'))
     console.log('server running at port 3000')
 })
+
+
+

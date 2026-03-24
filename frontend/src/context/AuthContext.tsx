@@ -10,11 +10,24 @@ interface User {
     email: string;
 }
 
+interface SQLProblem {
+  id: number;
+  title: string;
+  difficulty: "easy" | "medium" | "hard";
+  category: string;
+  description: string;
+  schema: string;
+  starterCode: string;
+  expectedOutput: string;
+  tags: string[];
+}
+
 interface AuthContextType {
     userdata: User | null;
     login: (email: string, password: string) => Promise<User | undefined> ;
     signup: (name: string, email: string, password: string) => Promise<User | undefined>;
     logout: () => void;
+    question: () => Promise<SQLProblem[] | undefined >;
 }
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -83,8 +96,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         sessionStorage.removeItem('user_data');
     }, []);
 
+    const question = useCallback(async()=>{
+        try {
+            const response = await axios.get(`${BASE_URL}/question`)
+            return response.data.question
+        } catch (error) {
+            console.log(error)
+        }
+    },[])
+
     return (
-        <AuthContext.Provider value={{ userdata, login, signup, logout }}>
+        <AuthContext.Provider value={{ userdata, login, signup, logout,question }}>
             {children}
         </AuthContext.Provider>
     );
