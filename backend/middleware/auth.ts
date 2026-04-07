@@ -10,7 +10,14 @@ export const Auth = (req:Request,res:Response,next:NextFunction) =>{
         return
     }
     try {
-        const decoded = jwt.verify(token,process.env.JWT_SECRET || '')
+        const decoded = jwt.verify(token,process.env.JWT_SECRET || '') as {userId : string}
+        if(!decoded){
+            res.status(500).json({
+                message:'unauthorized'
+            })
+            return
+        }
+        req.userId = decoded.userId
         next()
     } catch (error) {
         res.status(500).json({
