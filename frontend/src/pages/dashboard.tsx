@@ -146,7 +146,7 @@ function RunResult({ result, onDismiss }) {
 
 // ─── Dashboard Page ───────────────────────────────────────────────
 export default function Dashboard() {
-    const { userdata, logout ,question } = useAuth();
+    const { userdata, logout ,question ,dashboard } = useAuth();
     const navigate = useNavigate();
 
     const [selectedId, setSelectedId] = useState(null);
@@ -158,6 +158,7 @@ export default function Dashboard() {
     const [listExpanded, setListExpanded] = useState(false);
 
     const [SQL_QUESTIONS , setSQL_QUESTIONS ]= useState<SQLProblem[]>([]) 
+    const [user_dashboard, setUser_Dashboard] = useState([])
 
     useEffect(()=>{
         question()
@@ -166,7 +167,13 @@ export default function Dashboard() {
                 
         })
         .catch(() => console.log("Failed to fetch questions"))
-    },[question])
+        dashboard()
+        .then((data) => {
+            if (data) setUser_Dashboard(data)
+                console.log(data)
+        })
+        .catch(() => console.log("Failed to fetch questions"))
+    },[question,dashboard])
     
     const selectedQ =  SQL_QUESTIONS.find(q => q._id === selectedId) || null
         

@@ -7,13 +7,16 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { Auth } from "./middleware/auth";
 import cors from 'cors'
+import cookieParser from "cookie-parser";
 
 const app = express()
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 const saltRounds = 10
 app.use(express.json())
+app.use(cookieParser())
 app.use(cors({
-    origin: 'http://localhost:5173'
+    origin: 'http://localhost:5173',
+    credentials:true
 }))
 
 app.get('/question', async (req, res) => {

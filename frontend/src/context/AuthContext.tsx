@@ -28,6 +28,7 @@ interface AuthContextType {
     signup: (name: string, email: string, password: string) => Promise<User | undefined>;
     logout: () => void;
     question: () => Promise<SQLProblem[] | undefined >;
+    dashboard: ()=> Promise<void | undefined>
 }
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -105,8 +106,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     },[])
 
+    const dashboard = useCallback(async()=>{
+        try {
+            const response = await axios.get(`${BASE_URL}/dashboard`,{withCredentials:true})
+            return response.data.data
+        } catch (error) {
+            console.log(error)
+        }
+    },[])
+
     return (
-        <AuthContext.Provider value={{ userdata, login, signup, logout,question }}>
+        <AuthContext.Provider value={{ userdata, login, signup, logout,question, dashboard }}>
             {children}
         </AuthContext.Provider>
     );
