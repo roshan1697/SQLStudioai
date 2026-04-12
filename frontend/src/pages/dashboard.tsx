@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -159,6 +159,8 @@ export default function Dashboard() {
 
     const [SQL_QUESTIONS , setSQL_QUESTIONS ]= useState<SQLProblem[]>([]) 
     const [user_dashboard, setUser_Dashboard] = useState([])
+
+    const lastSavedValue  = useRef('') 
 
     useEffect(()=>{
         question()
