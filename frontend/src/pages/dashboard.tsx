@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 // import { SQL_QUESTIONS } from '../data/questions';
 import './dashboard.scss';
+import { Debounce } from '../context/debounce';
+
 
 // ─── Icons ───────────────────────────────────────────────────────
 const IconDB = () => (
@@ -58,15 +60,15 @@ const IconChevron = ({ up }) => (
 );
 
 interface SQLProblem {
-  _id: number;
-  title: string;
-  difficulty: "easy" | "medium" | "hard";
-  category: string;
-  description: string;
-  schema: string;
-  starterCode: string;
-  expectedOutput: string;
-  tags: string[];
+    _id: string;
+    title: string;
+    difficulty: "easy" | "medium" | "hard";
+    category: string;
+    description: string;
+    schema: string;
+    starterCode: string;
+    expectedOutput: string;
+    tags: string[];
 }
 // ─── Monaco Editor config ─────────────────────────────────────────
 const EDITOR_OPTIONS = {
@@ -146,7 +148,7 @@ function RunResult({ result, onDismiss }) {
 
 // ─── Dashboard Page ───────────────────────────────────────────────
 export default function Dashboard() {
-    const { userdata, logout ,question ,dashboard } = useAuth();
+    const { userdata, logout, question, dashboard, codesave } = useAuth();
     const navigate = useNavigate();
 
     const [selectedId, setSelectedId] = useState(null);
@@ -157,30 +159,31 @@ export default function Dashboard() {
     const [running, setRunning] = useState(false);
     const [listExpanded, setListExpanded] = useState(false);
 
-    const [SQL_QUESTIONS , setSQL_QUESTIONS ]= useState<SQLProblem[]>([]) 
+    const [SQL_QUESTIONS, setSQL_QUESTIONS] = useState<SQLProblem[]>([])
     const [user_dashboard, setUser_Dashboard] = useState([])
 
-    const lastSavedValue  = useRef('') 
+    const lastSavedValueRef = useRef('')
+    const isDirtyRef = useRef(false)
 
-    useEffect(()=>{
+    useEffect(() => {
         question()
-        .then((data) => {
-            if (data) setSQL_QUESTIONS(data)
-                
-        })
-        .catch(() => console.log("Failed to fetch questions"))
-        dashboard()
-        .then((data) => {
-            if (data) setUser_Dashboard(data)
-                console.log(data)
-        })
-        .catch(() => console.log("Failed to fetch questions"))
-    },[question,dashboard])
-    
-    const selectedQ =  SQL_QUESTIONS.find(q => q._id === selectedId) || null
-        
+            .then((data) => {
+                if (data) setSQL_QUESTIONS(data)
 
-    const filteredQuestions = 
+            })
+            .catch(() => console.log("Failed to fetch questions"))
+        dashboard()
+            .then((data) => {
+                if (data) setUser_Dashboard(data)
+                console.log(data)
+            })
+            .catch(() => console.log("Failed to fetch questions"))
+    }, [question, dashboard])
+
+    const selectedQ = SQL_QUESTIONS.find(q => q._id === selectedId) || null
+
+
+    const filteredQuestions =
         SQL_QUESTIONS.filter(q => {
             const matchFilter = filter === 'All' || q.difficulty === filter.toLowerCase();
             const matchSearch = !search ||
@@ -188,7 +191,7 @@ export default function Dashboard() {
                 q.category.toLowerCase().includes(search.toLowerCase());
             return matchFilter && matchSearch;
         });
-    
+
 
     const handleSelect = useCallback((q) => {
         setSelectedId(q._id);
@@ -204,6 +207,32 @@ export default function Dashboard() {
         setCodes(prev => ({ ...prev, [selectedId]: value || '' }));
     }, [selectedId]);
 
+
+    const saveToMongo = async (value) => {
+        if (!isDirtyRef.current) return
+        if (!selectedQ?._id) return;
+
+        try {
+            codesave(selectedQ?._id,value).then(data=> console.log(data))
+            lastSavedValueRef.current = value;
+            isDirtyRef.current = false
+        } catch (err) {
+            console.error("Save failed", err);
+        }
+    }
+    const saveToMongoRef = useRef(saveToMongo)
+    useEffect(() => {
+        saveToMongoRef.current = saveToMongo
+    })
+    const debounceSave = useMemo(() => Debounce((val) => {
+        isDirtyRef.current = true
+        saveToMongoRef.current(val)
+    }, 2000), [])
+
+
+
+
+
     const handleReset = useCallback(() => {
         if (!selectedQ) return;
         setCodes(prev => ({ ...prev, [selectedQ._id]: selectedQ.starterCode }));
@@ -214,18 +243,10 @@ export default function Dashboard() {
         if (!selectedQ || running) return;
         setRunning(true);
         setRunResult(null);
-        const delay = 400 + Math.random() * 600;
-        await new Promise(r => setTimeout(r, delay));
-        const ok = Math.random() > 0.3;
-        setRunResult({
-            ok,
-            message: ok
-                ? 'Query executed successfully — results match expected output'
-                : 'Syntax error near line 3 — check your JOIN condition',
-            time: Math.round(delay),
-        });
+
         setRunning(false);
     }, [selectedQ, running]);
+
 
     const handleLogout = () => {
         logout();
@@ -407,11 +428,12 @@ export default function Dashboard() {
 
                                     <div className="question-detail__monaco">
                                         <Editor
-                                            key={selectedQ.id}
+                                            key={selectedQ._id}
+
                                             language="sql"
                                             theme="vs-dark"
                                             value={currentCode}
-                                            onChange={handleEditorChange}
+                                            onChange={debounceSave}
                                             options={EDITOR_OPTIONS}
                                             beforeMount={(monaco) => {
                                                 // Custom dark theme

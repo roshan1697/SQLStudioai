@@ -38,8 +38,8 @@ export const AISchema = z.object({
     message: z.string()
 })
 
-export const userQuestionStateSchema = z.object({
-    user: objectId,
+export const QuestionStateSchema = z.object({
+    
     question: objectId,
 
     language: languageEnum.default("sql"),

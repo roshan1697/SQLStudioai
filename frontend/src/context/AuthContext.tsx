@@ -29,6 +29,7 @@ interface AuthContextType {
     logout: () => void;
     question: () => Promise<SQLProblem[] | undefined >;
     dashboard: ()=> Promise<void | undefined>
+    codesave:(questionId:string,code:string) => Promise<void | undefined>
 }
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -115,8 +116,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     },[])
 
+    const codesave = useCallback(async(questionId:string,code:string)=>{
+        try {
+            const res = await axios.post(`${BASE_URL}/codesave`,{
+                question:questionId,
+                code:code
+            },{withCredentials:true})
+            return res.data.message
+        } catch (error) {
+            console.log(error)
+        }
+
+    },[])
+
     return (
-        <AuthContext.Provider value={{ userdata, login, signup, logout,question, dashboard }}>
+        <AuthContext.Provider value={{ userdata, login, signup, logout,question, dashboard , codesave }}>
             {children}
         </AuthContext.Provider>
     );

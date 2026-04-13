@@ -1,5 +1,5 @@
 import express from "express";
-import { AISchema, LoginSchema, SignupSchema, userQuestionStateSchema } from "./types";
+import { AISchema, LoginSchema, SignupSchema, QuestionStateSchema } from "./types";
 import mongoose from "mongoose";
 import { SQLQuestion, User, UserQuestionState } from "./schema";
 import Groq from "groq-sdk";
@@ -27,6 +27,38 @@ app.get('/question', async (req, res) => {
         })
     } catch (error) {
         res.status(403).json({ message: 'DB error' })
+    }
+})
+
+app.post('/codesave',Auth , async(req,res)=>{
+    const parsedData = QuestionStateSchema.safeParse(req.body)
+    if(!parsedData.success){
+        res.status(403).json({ message: 'validation failed' })
+        return
+    }
+    const userId = req.userId
+    try {
+        const updateCode = await UserQuestionState.findOneAndUpdate({
+            user:userId,
+            question:parsedData.data.question,
+            
+        },
+        {
+            $set: {
+                code:parsedData.data.code
+            }
+        },
+        {
+            upsert:true,
+            returnDocument: 'after'
+        }
+    )
+            res.status(200).json({
+            message:'update'
+        })
+    } catch (error) {
+        res.status(403).json({ message: 'DB error' })
+    return
     }
 })
 

@@ -1,7 +1,7 @@
 import { useCallback, useRef, useEffect } from 'react';
 
 
-export const useDebounce = (callback, delay:number) => {
+export const Debounce = (callback, delay:number) => {
     const timeoutRef = useRef(null);
 
     // Clear timeout on unmount to prevent memory leaks
