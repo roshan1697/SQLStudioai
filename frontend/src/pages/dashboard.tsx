@@ -70,6 +70,8 @@ interface SQLProblem {
     expectedOutput: string;
     tags: string[];
 }
+
+
 // ─── Monaco Editor config ─────────────────────────────────────────
 const EDITOR_OPTIONS = {
     fontSize: 14,
@@ -89,7 +91,12 @@ const EDITOR_OPTIONS = {
     guides: { indentation: true },
     suggest: { showKeywords: true },
 };
-
+type QuestionState = {
+    _id: string;
+    question: string;
+    code: string;
+    language: string;
+}
 const FILTERS = ['All', 'Easy', 'Medium', 'Hard'];
 
 // ─── QuestionCard Component ───────────────────────────────────────
@@ -160,7 +167,8 @@ export default function Dashboard() {
     const [listExpanded, setListExpanded] = useState(false);
 
     const [SQL_QUESTIONS, setSQL_QUESTIONS] = useState<SQLProblem[]>([])
-    const [user_dashboard, setUser_Dashboard] = useState([])
+    const [user_dashboard, setUser_Dashboard] = useState<QuestionState[]>([])
+    const [auto_save_code, setAuto_save_code] = useState<QuestionState>()
 
     const lastSavedValueRef = useRef('')
     const isDirtyRef = useRef(false)
@@ -175,7 +183,6 @@ export default function Dashboard() {
         dashboard()
             .then((data) => {
                 if (data) setUser_Dashboard(data)
-                console.log(data)
             })
             .catch(() => console.log("Failed to fetch questions"))
     }, [question, dashboard])
@@ -213,7 +220,7 @@ export default function Dashboard() {
         if (!selectedQ?._id) return;
 
         try {
-            codesave(selectedQ?._id,value).then(data=> console.log(data))
+            codesave(selectedQ?._id, value).then(data => console.log(data))
             lastSavedValueRef.current = value;
             isDirtyRef.current = false
         } catch (err) {
@@ -252,8 +259,13 @@ export default function Dashboard() {
         logout();
         navigate('/login');
     };
+    useEffect(() => {
+        setAuto_save_code(
+            user_dashboard?.find(c => c.question.toString() === selectedQ?._id.toString())
+        )
+    }, [selectedQ])
+    const currentCode = selectedId ? ( auto_save_code?.code ?? selectedQ?.starterCode ?? '') : '';
 
-    const currentCode = selectedId ? (codes[selectedId] ?? selectedQ?.starterCode ?? '') : '';
     const initials = userdata?.email?.split(' ').map(n => n[0]).join('').slice(0, 2) || '??';
 
     return (

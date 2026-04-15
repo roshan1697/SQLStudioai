@@ -65,45 +65,56 @@ app.post('/codesave',Auth , async(req,res)=>{
 app.get('/dashboard', Auth, async (req, res) => {
     const userId = req.userId
     try {
-        const data = await UserQuestionState.aggregate([
-            {
-            $lookup: {
-                from: "userquestionstate",
-                let: { questionId: "$_id" },
-                pipeline: [
-                    {
-                        $match: {
-                            $expr: {
-                                $and: [
-                                    { $eq: ["$question", "$$questionId"] },
-                                    { $eq: ["$user", new mongoose.Types.ObjectId(userId)] }
-                                ]
-                            }
-                        }
-                    }
-                ],
-                as: "userState"
-            }
-  },
-    {
-        $unwind: {
-            path: "$userState",
-                preserveNullAndEmptyArrays: true
-        }
-    },
-    {
-        $project: {
-            title: 1,
-                difficulty: 1,
-                    status: {
-                $ifNull: ["$userState.status", "not_started"]
-            },
-            lastRunPassed: {
-                $ifNull: ["$userState.lastRunResult.passed", false]
-            }
-        }
-    }
-        ])
+    //     const data = await UserQuestionState.aggregate([
+    //         {
+    //         $lookup: {
+    //             from: "userquestionstate",
+    //             let: { questionId: "$_id" },
+    //             pipeline: [
+    //                 {
+    //                     $match: {
+    //                         $expr: {
+    //                             $and: [
+    //                                 { $eq: ["$question", "$$questionId"] },
+    //                                 { $eq: ["$user", new mongoose.Types.ObjectId(userId)] }
+    //                             ]
+    //                         }
+    //                     }
+    //                 }
+    //             ],
+    //             as: "userState"
+    //         }
+    // },
+    // {
+    //     $unwind: {
+    //         path: "$userState",
+    //             preserveNullAndEmptyArrays: true
+    //     }
+    // },
+    // {
+    //     $project: {
+    //         title: 1,
+    //             difficulty: 1,
+    //                 status: {
+    //             $ifNull: ["$userState.status", "not_startedd"]
+    //         },
+    //         lastRunPassed: {
+    //             $ifNull: ["$userState.lastRunResult.passed", false]
+    //         },
+    //         code: {
+    //             $ifNull: ["$userState.code", ""]
+    //         }
+    //     }
+    // }
+    //     ])
+            const data = await UserQuestionState.find({
+                user : new mongoose.Types.ObjectId(userId)
+            },{
+                _id:1, 
+                question:1,
+                language:1,
+                code:1
+            })
         res.status(200).json({
             data:data
         })
